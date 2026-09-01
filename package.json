@@ -7,10 +7,11 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "db:reset": "supabase db reset",
+    "typecheck": "tsc --noEmit",
     "db:start": "supabase start",
-    "types:gen": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
-    "typecheck": "tsc --noEmit"
+    "db:push": "supabase db push",
+    "db:reset": "supabase db reset",
+    "types:gen": "supabase gen types typescript --linked --schema public > src/lib/database.types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

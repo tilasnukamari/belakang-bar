@@ -1,93 +1,20 @@
-import {
-  SUPABASE_ANON_KEY,
-  SUPABASE_URL,
-  konfigurasiSupabaseLengkap,
-} from "@/lib/supabase/env";
+import { redirect } from "next/navigation";
 
-// Status koneksi harus dicek saat request, bukan dibekukan saat build.
+import { ambilProfil, berandaPeran } from "@/lib/auth";
+
+// Sesi diperiksa per request; jangan dibekukan saat build.
 export const dynamic = "force-dynamic";
 
-type Status = {
-  nada: "sunyi" | "ok" | "gagal";
-  label: string;
-  pesan: string;
-};
+/**
+ * "/" tidak punya tampilan sendiri. Tugasnya cuma satu: menentukan shell mana
+ * yang jadi rumah pengguna ini. Satu tempat, supaya aturan peran tidak tercecer.
+ *
+ * Tamu tanpa sesi sudah dicegat middleware sebelum sampai sini.
+ */
+export default async function Akar() {
+  const profil = await ambilProfil();
 
-async function cekKoneksi(): Promise<Status> {
-  if (!konfigurasiSupabaseLengkap()) {
-    return {
-      nada: "sunyi",
-      label: "Belum dikonfigurasi",
-      pesan: "Salin .env.example ke .env.local, lalu isi URL dan anon key.",
-    };
-  }
+  if (!profil || !profil.aktif) redirect("/keluar?alasan=nonaktif");
 
-  try {
-    // Sengaja /auth/v1/health, bukan /rest/v1/. Role `anon` dicabut semua grant-nya
-    // di migration 0002, jadi PostgREST membalas 401 untuk pengunjung yang belum
-    // login -- itu benar, tapi kalau dipakai sebagai probe hasilnya salah lapor.
-    const jawaban = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
-      headers: { apikey: SUPABASE_ANON_KEY },
-      cache: "no-store",
-    });
-
-    return jawaban.ok
-      ? {
-          nada: "ok",
-          label: "Tersambung",
-          pesan: `Project menjawab HTTP ${jawaban.status}.`,
-        }
-      : {
-          nada: "gagal",
-          label: "Ditolak",
-          pesan: `Project menjawab HTTP ${jawaban.status}. Cek URL dan anon key.`,
-        };
-  } catch (galat) {
-    return {
-      nada: "gagal",
-      label: "Tidak terhubung",
-      pesan: galat instanceof Error ? galat.message : "Server tidak menjawab.",
-    };
-  }
-}
-
-const gayaNada: Record<Status["nada"], string> = {
-  ok: "border-caramel bg-caramel/10 text-mocha",
-  sunyi: "border-latte bg-cream text-mocha",
-  gagal: "border-espresso bg-latte text-espresso",
-};
-
-export default async function Beranda() {
-  const status = await cekKoneksi();
-
-  return (
-    <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col justify-center gap-8 px-6 py-16">
-      <header>
-        <p className="text-sm font-medium uppercase tracking-widest text-mocha">
-          s&rsquo;mugKopi
-        </p>
-        <h1 className="mt-1 text-4xl font-extrabold text-espresso">
-          Belakang Bar
-        </h1>
-        <p className="mt-2 text-base text-mocha">
-          Aplikasi management internal. Bukan kasir.
-        </p>
-      </header>
-
-      <section
-        className={`rounded-2xl border-2 p-5 ${gayaNada[status.nada]}`}
-        aria-live="polite"
-      >
-        <h2 className="text-xs font-semibold uppercase tracking-widest">
-          Koneksi Supabase
-        </h2>
-        <p className="mt-1 text-2xl font-bold">{status.label}</p>
-        <p className="mt-2 text-sm leading-relaxed">{status.pesan}</p>
-      </section>
-
-      <p className="text-sm text-mocha">
-        Langkah 1 dari 6 — fondasi data. Belum ada UI kerja di sini.
-      </p>
-    </main>
-  );
+  redirect(berandaPeran(profil.peran));
 }

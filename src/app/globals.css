@@ -11,6 +11,10 @@
   --color-espresso: #2a1c14;
   /* TERBATAS — khusus cerita kopi lokal, jangan jadi warna utama */
   --color-daun: #4a6b4f;
+  /* Ditambahkan di langkah 2 atas persetujuan OWNER: palet asli tidak punya
+     warna bahaya, sementara tombol hapus dan pesan gagal butuh pembeda yang
+     tidak cuma "lebih gelap". Perlu disamakan dengan repo website. */
+  --color-bata: #a3402f;
 
   --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
 
@@ -22,4 +26,24 @@ body {
   background: var(--color-krem);
   color: var(--color-espresso);
   font-family: var(--font-sans);
+}
+
+/* Fokus keyboard wajib kelihatan di semua elemen interaktif. Caramel dipilih
+   karena terbaca baik di atas krem maupun di atas espresso; offset menaruh
+   cincinnya di luar tombol, jadi tetap terlihat di tombol caramel sendiri. */
+:focus-visible {
+  outline: 3px solid var(--color-caramel);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
