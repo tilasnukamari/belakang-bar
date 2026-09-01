@@ -23,7 +23,10 @@ async function cekKoneksi(): Promise<Status> {
   }
 
   try {
-    const jawaban = await fetch(`${SUPABASE_URL}/rest/v1/`, {
+    // Sengaja /auth/v1/health, bukan /rest/v1/. Role `anon` dicabut semua grant-nya
+    // di migration 0002, jadi PostgREST membalas 401 untuk pengunjung yang belum
+    // login -- itu benar, tapi kalau dipakai sebagai probe hasilnya salah lapor.
+    const jawaban = await fetch(`${SUPABASE_URL}/auth/v1/health`, {
       headers: { apikey: SUPABASE_ANON_KEY },
       cache: "no-store",
     });
@@ -32,12 +35,12 @@ async function cekKoneksi(): Promise<Status> {
       ? {
           nada: "ok",
           label: "Tersambung",
-          pesan: `PostgREST menjawab HTTP ${jawaban.status}.`,
+          pesan: `Project menjawab HTTP ${jawaban.status}.`,
         }
       : {
           nada: "gagal",
           label: "Ditolak",
-          pesan: `PostgREST menjawab HTTP ${jawaban.status}. Cek anon key.`,
+          pesan: `Project menjawab HTTP ${jawaban.status}. Cek URL dan anon key.`,
         };
   } catch (galat) {
     return {
