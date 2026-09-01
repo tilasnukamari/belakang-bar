@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+/* Palet brand s'mugKopi — lihat CLAUDE.md.
+   App internal: kontras lebih tegas daripada website marketing. */
+@theme {
+  --color-krem: #fbf7f1;
+  --color-cream: #f7f0e6;
+  --color-latte: #e6d3b8;
+  --color-caramel: #c68a4b;
+  --color-mocha: #7a5138;
+  --color-espresso: #2a1c14;
+  /* TERBATAS — khusus cerita kopi lokal, jangan jadi warna utama */
+  --color-daun: #4a6b4f;
+
+  --font-sans: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+
+  /* Target sentuh minimal 44px (aturan mati #1: satu tangan, di bawah 10 detik) */
+  --spacing-sentuh: 44px;
+}
+
+body {
+  background: var(--color-krem);
+  color: var(--color-espresso);
+  font-family: var(--font-sans);
+}
